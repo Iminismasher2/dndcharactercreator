@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Custom Sheet Builder</title>
+    <!-- Tailwind CSS for Layout -->
+    <script src="https://tailwindcss.com"></script>
+    <!-- Gridstack CSS & JS for Drag and Drop -->
+    <link href="https://jsdelivr.net" rel="stylesheet"/>
+    <script src="https://jsdelivr.net"></script>
+    <!-- html2pdf for Exporting -->
+    <script src="https://cloudflare.com"></script>
+    
+    <style>
+        /* D&D Paper Visual Style */
+        .parchment-bg {
+            background-color: #fbfaf6;
+            background-image: radial-gradient(#fffdfa 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        .dnd-border {
+            border: 3px solid #000000;
+            border-radius: 8px;
+            box-shadow: 0 4px 0 #000000;
+        }
+        .dnd-bubble {
+            border: 2px solid #000000;
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-stone-800 text-stone-900 font-serif min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-stone-900 text-stone-100 p-4 flex justify-between items-center border-b-4 border-red-700 shadow-md">
+        <h1 class="text-xl font-bold tracking-wider text-amber-500 uppercase">⚔️ D&D Layout Architect</h1>
+        <div class="space-x-3">
+            <button onclick="clearCanvas()" class="px-4 py-2 bg-stone-700 hover:bg-stone-600 rounded text-sm font-semibold transition">Clear Canvas</button>
+            <button onclick="exportToPDF()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-stone-900 rounded text-sm font-black tracking-wide transition shadow-lg">Export PDF</button>
+        </div>
+    </header>
+
+    <!-- App Body Layout -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Left Sidebar: Element Toolbox -->
+        <aside class="w-80 bg-stone-900 border-r-2 border-stone-700 p-4 space-y-6 overflow-y-auto">
+            <h2 class="text-stone-400 text-xs font-bold uppercase tracking-widest border-b border-stone-700 pb-2">Toolbox (Drag Components)</h2>
+            
+            <div id="toolbox" class="space-y-4">
+                <!-- Template 1: Ability Score Box -->
+                <div class="grid-stack-item sidebar-item" data-type="ability">
+                    <div class="grid-stack-item-content p-2 bg-stone-800 border border-stone-600 rounded cursor-grab hover:border-amber-500 text-stone-300">
+                        <div class="text-xs font-bold text-center border-b border-stone-700 pb-1 text-amber-500">Preview: Ability Block</div>
+                        <div class="mt-2 w-16 h-20 bg-white dnd-border mx-auto flex flex-col justify-between items-center p-1 text-black">
+                            <span class="text-[9px] uppercase font-bold tracking-tighter">Strength</span>
+                            <span class="text-xl font-bold mt-1">+0</span>
+                            <div class="w-8 h-5 dnd-bubble text-[10px] font-bold flex items-center justify-center bg-gray-100 mb-1">10</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template 2: Single Stat Box -->
+                <div class="grid-stack-item sidebar-item" data-type="stat">
+                    <div class="grid-stack-item-content p-2 bg-stone-800 border border-stone-600 rounded cursor-grab hover:border-amber-500 text-stone-300">
+                        <div class="text-xs font-bold text-center border-b border-stone-700 pb-1 text-amber-500">Preview: Square Box</div>
+                        <div class="mt-2 w-20 h-16 bg-white dnd-border mx-auto flex flex-col items-center justify-center p-1 text-black">
+                            <span class="text-[10px] uppercase font-bold tracking-tighter">Armor Class</span>
+                            <span class="text-xl font-bold">10</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template 3: Large Text Area Box -->
+                <div class="grid-stack-item sidebar-item" data-type="notes">
+                    <div class="grid-stack-item-content p-2 bg-stone-800 border border-stone-600 rounded cursor-grab hover:border-amber-500 text-stone-300">
+                        <div class="text-xs font-bold text-center border-b border-stone-700 pb-1 text-amber-500">Preview: Notepad Container</div>
+                        <div class="mt-2 w-full h-20 bg-white dnd-border p-2 text-black flex flex-col">
+                            <span class="text-[10px] uppercase font-bold border-b border-black mb-1">Equipment / Notes</span>
+                            <div class="flex-1 border border-dashed border-gray-300"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Side: Interactive Layout Canvas -->
+        <main class="flex-1 p-8 overflow-auto bg-stone-700 flex justify-center">
+            <!-- This container matches standard Letter paper aspect ratios -->
+            <div id="print-area" class="w-[8.5in] min-h-[11in] parchment-bg shadow-2xl p-8 dnd-border relative">
+                
+                <!-- Character Sheet Header (Static Example) -->
+                <div class="flex items-end space-x-4 border-b-2 border-black pb-4 mb-6">
+                    <div class="w-1/3">
+                        <input type="text" placeholder="Character Name" class="w-full bg-transparent text-xl font-bold border-b border-black focus:outline-none placeholder-stone-400">
+                    </div>
+                    <div class="w-2/3 grid grid-cols-3 gap-2 text-xs">
+                        <input type="text" placeholder="Class & Level" class="bg-transparent border-b border-black p-1 focus:outline-none">
+                        <input type="text" placeholder="Background" class="bg-transparent border-b border-black p-1 focus:outline-none">
+                        <input type="text" placeholder="Player Name" class="bg-transparent border-b border-black p-1 focus:outline-none">
+                    </div>
+                </div>
+
+                <!-- Gridstack Canvas Viewport -->
+                <div class="grid-stack"></div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Initialization Logic and Templates -->
+    <script>
+        let grid;
+
+        // HTML Templates generated upon drops
+        const componentTemplates = {
+            ability: `
+                <div class="w-full h-full bg-white dnd-border flex flex-col justify-between items-center p-2 shadow-inner group relative">
+                    <input type="text" value="STRENGTH" class="w-full text-center text-[10px] font-black uppercase bg-transparent border-none focus:outline-none select-text tracking-tighter">
+                    <input type="text" value="+0" class="w-full text-center text-3xl font-black bg-transparent border-none focus:outline-none select-text -mt-2">
+                    <div class="w-10 h-6 dnd-bubble text-xs font-bold flex items-center justify-center bg-stone-50">
+                        <input type="text" value="10" class="w-full text-center bg-transparent border-none focus:outline-none font-bold">
+                    </div>
+                    <button onclick="removeWidget(this)" class="absolute top-1 right-1 text-red-500 opacity-0 group-hover:opacity-100 text-xs font-bold transition">✕</button>
+                </div>
+            `,
+            stat: `
+                <div class="w-full h-full bg-white dnd-border flex flex-col items-center justify-center p-2 shadow-inner group relative">
+                    <input type="text" value="ARMOR CLASS" class="w-full text-center text-[10px] font-black uppercase bg-transparent border-none focus:outline-none select-text tracking-tighter">
+                    <input type="text" value="10" class="w-full text-center text-2xl font-black bg-transparent border-none focus:outline-none select-text mt-1">
+                    <button onclick="removeWidget(this)" class="absolute top-1 right-1 text-red-500 opacity-0 group-hover:opacity-100 text-xs font-bold transition">✕</button>
+                </div>
+            `,
+            notes: `
+                <div class="w-full h-full bg-white dnd-border p-3 shadow-inner flex flex-col group relative">
+                    <input type="text" value="FEATURES & TRAITS" class="w-full text-[11px] font-black uppercase bg-transparent border-b border-black focus:outline-none select-text mb-2 tracking-wide">
+                    <textarea class="w-full flex-1 bg-transparent resize-none focus:outline-none text-xs leading-relaxed" placeholder="Type contents here..."></textarea>
+                    <button onclick="removeWidget(this)" class="absolute top-1 right-1 text-red-500 opacity-0 group-hover:opacity-100 text-xs font-bold transition">✕</button>
+                </div>
+            `
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Dynamic Responsive Grid
+            grid = GridStack.init({
+                column: 12,
+                cellHeight: 45,
+                margin: 6,
+                acceptWidgets: true,
+                dragIn: '.sidebar-item',
+                dragInOptions: { revert: 'invalid', scroll: false, appendTo: 'body', helper: 'clone' },
+                float: true // Allow elements to sit freely on lines without jumping to top gaps
+            });
+
+            // Listen for structural element drops from the side panel
+            grid.on('added', function(event, items) {
+                items.forEach(function(item) {
+                    const el = item.el;
+                    const type = el.getAttribute('data-type');
+                    
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Dynamic Responsive Grid
+    grid = GridStack.init({
+        column: 12,
+        cellHeight: 45,
+        margin: 6,
+        acceptWidgets: true,
+        dragIn: '.sidebar-item',
+        dragInOptions: { revert: 'invalid', scroll: false, appendTo: 'body', helper: 'clone' },
+        float: true // Allow elements to sit freely on lines without jumping to top gaps
+    });
+
+    // Listen for structural element drops from the side panel
+    grid.on('added', function(event, items) {
+        items.forEach(function(item) {
+            const el = item.el;
+            const type = el.getAttribute('data-type');
+            
+            if (type && componentTemplates[type]) {
+                // Swap out mock preview with editable D&D block HTML content
+                el.innerHTML = componentTemplates[type];
+                el.removeAttribute('data-type'); 
+                saveLayoutState();
+            }
+        });
+    });
+
+    // Re-save system bounds when moving or resizing items
+    grid.on('change', saveLayoutState);
+
+    // Fetch state structural schema from Local Browser Cache
+    loadLayoutState();
+});
+
+/**
+ * Clear out current active canvas structure
+ */
+function clearCanvas() {
+    if (confirm("Are you sure you want to clear your current sheet design?")) {
+        grid.removeAll();
+        localStorage.removeItem('dnd_grid_layout');
+    }
+}
+
+/**
+ * Drop specific targeted node container
+ * @param {HTMLElement} button - The delete button clicked inside the component
+ */
+function removeWidget(button) {
+    const gridItem = button.closest('.grid-stack-item');
+    grid.removeWidget(gridItem);
+    saveLayoutState();
+}
+
+/**
+ * Commit positional configuration schemas and element values across local storage
+ */
+function saveLayoutState() {
+    const data = grid.save(false); // Retrieves coordinate maps without full internal DOM markup trees
+    const elementsData = [];
+    
+    document.querySelectorAll('.grid-stack-item').forEach((el, index) => {
+        const textareas = el.querySelectorAll('textarea');
+        const inputs = el.querySelectorAll('input');
+        
+        elementsData.push({
+            html: el.innerHTML,
+            inputs: Array.from(inputs).map(i => i.value),
+            textareas: Array.from(textareas).map(t => t.value)
+        });
+    });
+
+    localStorage.setItem('dnd_grid_layout', JSON.stringify({ layout: data, elements: elementsData }));
+}
+
+/**
+ * Pull previous layouts down onto canvas elements natively 
+ */
+function loadLayoutState() {
+    const stateString = localStorage.getItem('dnd_grid_layout');
+    if (!stateString) return;
+
+    const state = JSON.parse(stateString);
+    grid.load(state.layout);
+
+    // Re-bind content changes onto matching elements
+    const items = document.querySelectorAll('.grid-stack-item');
+    items.forEach((el, index) => {
+        if (state.elements[index]) {
+            el.innerHTML = state.elements[index].html;
+            
+            const inputs = el.querySelectorAll('input');
+            inputs.forEach((input, i) => {
+                if (state.elements[index].inputs[i] !== undefined) {
+                    input.value = state.elements[index].inputs[i];
+                }
+            });
+
+            const textareas = el.querySelectorAll('textarea');
+            textareas.forEach((textarea, t) => {
+                if (state.elements[index].textareas[t] !== undefined) {
+                    textarea.value = state.elements[index].textareas[t];
+                }
+            });
+        }
+    });
+}
+
+/**
+ * Compile canvas viewport area downward directly into printable vector PDF arrays
+ */
+function exportToPDF() {
+    const element = document.getElementById('print-area');
+    
+    // Temporarily hide functional UI buttons like deletion triggers during clean prints
+    const style = document.createElement('style');
+    style.innerHTML = '.group hover\\:opacity-100, button { display: none !important; } header button { display: inline-block !important; }';
+    document.head.appendChild(style);
+
+    const opt = {
+        margin:       0,
+        filename:     'my_dnd_character_sheet.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save().then(() => {
+        style.remove(); // Re-enable active UI bounds on render cycles completion
+    });
+}
