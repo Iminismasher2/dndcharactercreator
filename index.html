@@ -9,8 +9,9 @@
     <!-- Optimized Gridstack Assets -->
     <link href="https://jsdelivr.net" rel="stylesheet"/>
     <script src="https://jsdelivr.net"></script>
-    <!-- html2pdf for clean print vectors -->
-    <script src="https://cloudflare.com"></script>
+<!-- Replace your old html2pdf script with this stable version -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
     
     <style>
         /* Modernized Clean D&D Aesthetics */
@@ -274,23 +275,52 @@ function loadLayoutState() {
 /**
  * Render canvas nodes cleanly into an offline printable vector PDF configuration
  */
+/**
+ * Render canvas nodes cleanly into an offline printable vector PDF configuration
+ */
 function exportToPDF() {
     const element = document.getElementById('print-area');
-    
-    // Clean interface assets before rasterization prints
+    if (!element) {
+        alert("Error: Canvas printing print-area container not found.");
+        return;
+    }
+
+    // Safely inject clean display print rules
     const style = document.createElement('style');
-    style.innerHTML = 'button, .absolute { display: none !important; }';
+    style.id = 'pdf-temporary-print-style';
+    style.innerHTML = 'button, .absolute, .grid-stack-handle { display: none !important; }';
     document.head.appendChild(style);
 
+    // Optimized configuration rules for stable 0.9.3 execution tracks
     const opt = {
         margin:       0,
-        filename:     'custom_character_sheet.pdf',
-        image:        { type: 'jpeg', quality: 0.95 },
-        html2canvas:  { scale: 1.5, useCORS: true, logging: false },
+        filename:     'character_sheet.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { 
+            scale: 2, 
+            useCORS: true, 
+            logging: false,
+            letterRendering: true
+        },
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(element).save().then(() => {
-        style.remove();
-    });
+    // Use a tiny delay to ensure the DOM updates and hides the buttons first
+    setTimeout(() => {
+        html2pdf()
+            .set(opt)
+            .from(element)
+            .save()
+            .then(() => {
+                // Remove print styling clean-up layer safely
+                const targetStyle = document.getElementById('pdf-temporary-print-style');
+                if (targetStyle) targetStyle.remove();
+            })
+            .catch((error) => {
+                console.error("PDF engine crash details:", error);
+                const targetStyle = document.getElementById('pdf-temporary-print-style');
+                if (targetStyle) targetStyle.remove();
+                alert("The PDF generator encountered a layout error. Check your browser console log details.");
+            });
+    }, 150);
 }
