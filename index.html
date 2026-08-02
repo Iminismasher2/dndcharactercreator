@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Document Sheet Studio</title>
+    <!-- Tailwind CSS Engine for Quick Structural Utilities -->
+    <script src="https://tailwindcss.com"></script>
+    <!-- Optimized Gridstack Layout Assets -->
+    <link href="https://jsdelivr.net" rel="stylesheet"/>
+    <script src="https://jsdelivr.net"></script>
+    <!-- Stable HTML2PDF Engine Layer -->
+    <script src="https://cloudflare.com"></script>
+    <!-- Custom Style Sheet Reference Links -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-zinc-50 text-zinc-900 font-sans min-h-screen flex flex-col antialiased">
+
+    <!-- Workspace Utility Menu -->
+    <header class="h-14 bg-white border-b border-zinc-200 px-8 flex justify-between items-center z-10 shrink-0">
+        <div class="flex items-center space-x-2">
+            <h1 class="text-xs font-semibold uppercase tracking-widest text-zinc-400">Sheet Architect</h1>
+        </div>
+        <div class="flex items-center space-x-6">
+            <button onclick="clearCanvas()" class="text-xs font-medium text-zinc-400 hover:text-zinc-900 transition">Reset Workspace</button>
+            <button onclick="addNewPage()" class="text-xs font-medium text-zinc-600 hover:text-zinc-900 transition">＋ Add Page</button>
+            <button onclick="exportToPDF()" class="px-4 py-1.5 text-xs font-medium bg-zinc-900 hover:bg-zinc-800 text-white rounded transition">Download PDF</button>
+        </div>
+    </header>
+
+    <!-- Project Workspace Area -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Toolbox Left Drawer Panel -->
+        <aside class="w-64 bg-white border-r border-zinc-200 p-6 space-y-4 flex flex-col no-scrollbar overflow-y-auto shrink-0">
+            <div class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest border-b border-zinc-100 pb-2">Drag Outlined Elements</div>
+            
+            <div id="toolbox" class="space-y-2">
+                <!-- Standard Block Model Container -->
+                <div class="grid-stack-item sidebar-item cursor-grab" data-type="block">
+                    <div class="grid-stack-item-content p-3 bg-zinc-50 hover:bg-zinc-100/70 border border-zinc-200 rounded text-xs text-zinc-600 transition flex items-center justify-between">
+                        <span>Outlined Input Block</span>
+                        <span class="text-zinc-400 text-xs">＋</span>
+                    </div>
+                </div>
+
+                <!-- Textarea Component Box -->
+                <div class="grid-stack-item sidebar-item cursor-grab" data-type="notes">
+                    <div class="grid-stack-item-content p-3 bg-zinc-50 hover:bg-zinc-100/70 border border-zinc-200 rounded text-xs text-zinc-600 transition flex items-center justify-between">
+                        <span>Outlined Notes Box</span>
+                        <span class="text-zinc-400 text-xs">＋</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Document Sheet Layout Main Frame Viewport -->
+        <main class="flex-1 bg-zinc-100 p-8 overflow-y-auto flex flex-col items-center space-y-8 no-scrollbar" id="document-scroll-container">
+            
+            <!-- Global Interactive Collection Envelope -->
+            <div id="print-area" class="flex flex-col space-y-8">
+                <!-- First Page Context Default Element Container -->
+                <div class="doc-page minimal-sheet shadow-sm p-12 border border-zinc-200 relative">
+                    <div class="grid-stack" data-page-index="0"></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Application Script Reference Links Injection -->
+    <script src="app.js"></script>
+</body>
+</html>
