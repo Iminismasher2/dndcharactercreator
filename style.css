@@ -1,0 +1,46 @@
+/* Minimalist Document Page Engine Structure Rules */
+.doc-page {
+    width: 8.5in;
+    min-height: 11in;
+    height: 11in; /* Hard layout page restrictions to preserve printing lines */
+    background-color: #ffffff;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Sharp Hairline Outlined Input Widgets */
+.minimal-outline-box {
+    border: 1px solid #d4d4d8; /* zinc-300 */
+    background-color: #ffffff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.minimal-outline-box:hover, 
+.minimal-outline-box:focus-within {
+    border-color: #71717a; /* zinc-500 */
+}
+
+/* Form Structural Inputs Settings */
+.box-header-input {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #52525b; /* zinc-600 */
+}
+
+.box-body-content {
+    font-size: 14px;
+    font-weight: 400;
+    color: #18181b; /* zinc-900 */
+}
+
+/* System Gridstack Layout Drag Bounds Overwrites */
+.grid-stack-item-content {
+    overflow: visible !important;
+}
+
+/* Custom Minimalist Scrollbar Trimming UI Rules */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
